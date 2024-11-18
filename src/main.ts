@@ -14,7 +14,13 @@ async function bootstrap() {
   // Swagger configuration
   setupSwagger(app);
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+  );
 
   const port = configService.get<number>('PORT') || process.env.PORT || 3000;
   await app.listen(port);

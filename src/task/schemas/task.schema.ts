@@ -1,6 +1,6 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import {Document, Types} from 'mongoose';
 import {Group} from "../../group/schemas/group.schema";
 
 export type TaskDocument = Task & Document;
@@ -16,8 +16,8 @@ export class Task extends Document {
   @Prop({ default: false })
   completed?: boolean;
 
-  @Prop()
-  groupId?: string;
+  @Prop({ type: Types.ObjectId, ref: Group.name })
+  groupId?: Types.ObjectId;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

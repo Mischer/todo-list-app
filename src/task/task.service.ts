@@ -1,4 +1,3 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TaskRepository } from './repository/task.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -6,13 +5,20 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import {ITaskFilter} from "./repository/interfaces/ITaskFilter";
 import {Task} from "./schemas/task.schema";
 import {CompleteTaskDto} from "./dto/complete-task.dto";
+import {Types} from "mongoose";
 
 @Injectable()
 export class TaskService {
   constructor(private readonly taskRepository: TaskRepository) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskRepository.create(createTaskDto);
+    // TODO use mapper instead
+    const task = {
+      name: createTaskDto.name,
+      description: createTaskDto.description,
+      ...(createTaskDto.groupId ? {groupId: new Types.ObjectId(createTaskDto.groupId)} : {}),
+    };
+    return this.taskRepository.create(task);
   }
 
   async findAll(filter: ITaskFilter = {}): Promise<Task[]> {

@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Task } from '../schemas/task.schema';
+import {Task, TaskDocument} from '../schemas/task.schema';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
 import {ITaskFilter} from "./interfaces/ITaskFilter";
@@ -12,8 +12,8 @@ import {CompleteTaskDto} from "../dto/complete-task.dto";
 export class TaskRepository {
   constructor(@InjectModel(Task.name) private readonly taskModel: Model<Task>) {}
 
-  async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskModel.create(createTaskDto);
+  async create(task: Partial<TaskDocument>): Promise<Task> {
+    return this.taskModel.create(task);
   }
 
   async findAll(filter: ITaskFilter = {}): Promise<Task[]> {

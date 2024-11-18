@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsBoolean, MaxLength, IsOptional } from 'class-validator';
+import {IsString, IsNotEmpty, IsBoolean, MaxLength, IsOptional, IsMongoId} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateTaskDto {
@@ -23,18 +23,10 @@ export class CreateTaskDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Completion status of the task',
-    example: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  completed?: boolean;
-
-  @ApiPropertyOptional({
     description: 'ID of the group to which the task belongs',
     example: '61e8a3b1f0e4b3c1a2b4d5e6',
   })
-  @IsString()
+  @IsMongoId()
   @IsOptional()
   groupId?: string;
 }
