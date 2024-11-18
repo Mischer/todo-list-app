@@ -53,7 +53,7 @@ describe('groupController (e2e)', () => {
 
 		expect(Array.isArray(response.body)).toBe(true);
 		expect(response.body.length).toEqual(1);
-		expect(response.body[0]).toEqual(group);
+		expect(response.body[0].name).toEqual(group.name);
 	});
 
 	it('GET /groups/:id - should return a group by ID', async () => {

@@ -1,87 +1,101 @@
-/*
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
-import { CounterDocument } from '../src/counter/schemas/counter.model';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { faker } from '@faker-js/faker';
+import { TaskDocument } from '../src/task/schemas/task.schema';
+import {AppModule} from "../src/app.module";
+import {CreateTaskDto} from "../src/task/dto/create-task.dto";
+import {UpdateTaskDto} from "../src/task/dto/update-task.dto";
+import {CompleteTaskDto} from "../src/task/dto/complete-task.dto";
 
-const counterApiPath = '/counters';
+const taskApiPath = '/tasks';
 
-describe('CounterController (e2e)', () => {
-	let app: INestApplication;
-	let counterId: string;
-	let counter: CounterDocument;
-	const teamId = new mongoose.Types.ObjectId();
+describe('TaskController (e2e)', () => {
+    let app: INestApplication;
+    let mongoServer: MongoMemoryServer;
+    let taskId: string;
+    let task: TaskDocument;
 
-	let mongoServer: MongoMemoryServer;
+    beforeAll(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
 
-	beforeAll(async () => {
-		mongoServer = await MongoMemoryServer.create();
-		const mongoUri = mongoServer.getUri();
+        const moduleFixture: TestingModule = await Test.createTestingModule({
+            imports: [MongooseModule.forRoot(mongoUri), AppModule],
+        }).compile();
 
-		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [MongooseModule.forRoot(mongoUri), AppModule],
-		}).compile();
+        app = moduleFixture.createNestApplication();
+        await app.init();
+    });
 
-		app = moduleFixture.createNestApplication();
-		await app.init();
-	});
+    afterAll(async () => {
+        await mongoose.disconnect();
+        await mongoServer.stop();
+        await app.close();
+    });
 
-	afterAll(async () => {
-		await mongoose.disconnect();
-		await mongoServer.stop();
-		await app.close();
-	});
+    it('POST /tasks - should create a new task', async () => {
+        const createTaskDto: CreateTaskDto = {
+            name: 'Test Task',
+            description: 'Test Description',
+        };
 
-	it('POST api/counters - should create a new counter', async () => {
-		const createCounterDto = {
-			teamId: teamId.toString(),
-			steps: 100,
-		};
+        const response = await request(app.getHttpServer()).post(taskApiPath).send(createTaskDto).expect(201);
 
-		const response = await request(app.getHttpServer()).post(counterApiPath).send(createCounterDto).expect(201);
+        expect(response.body.name).toBe(createTaskDto.name);
+        expect(response.body.description).toBe(createTaskDto.description);
+        taskId = response.body._id;
+        task = response.body as TaskDocument;
+    });
 
-		expect(response.body.team).toBe(createCounterDto.teamId);
-		expect(response.body.steps).toBe(createCounterDto.steps);
-		counterId = response.body._id;
-		counter = response.body as CounterDocument;
-	});
+    it('GET /tasks - should return all tasks', async () => {
+        const response = await request(app.getHttpServer()).get(taskApiPath).expect(200);
 
-	it('GET /counters/:id - should return the created counter', async () => {
-		const response = await request(app.getHttpServer()).get(`${counterApiPath}/${counterId}`).expect(200);
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length).toEqual(1);
+        expect(response.body[0].name).toEqual(task.name);
+    });
 
-		expect(response.body._id).toBe(counterId);
-		expect(response.body.team).toBe(teamId.toString());
-	});
+    it('GET /tasks/:id - should return a task by ID', async () => {
+        const response = await request(app.getHttpServer()).get(`${taskApiPath}/${taskId}`).expect(200);
 
-	it('PATCH /counters/:id/increment - should update steps of the counter', async () => {
-		const incrementStepsDto = {
-			steps: faker.number.int({ min: 1, max: 1000 }),
-		};
+        expect(response.body._id).toBe(taskId);
+        expect(response.body.name).toBe(task.name);
+    });
 
-		const response = await request(app.getHttpServer())
-			.patch(`${counterApiPath}/${counterId}/increment`)
-			.send(incrementStepsDto)
-			.expect(200);
+    it('PATCH /tasks/:id - should update the task', async () => {
+        const updateTaskDto: UpdateTaskDto = {
+            name: 'Updated Task',
+            description: 'Updated Description',
+        };
 
-		expect(response.body.steps).toBe(counter.steps + incrementStepsDto.steps);
-	});
+        const response = await request(app.getHttpServer())
+            .patch(`${taskApiPath}/${taskId}`)
+            .send(updateTaskDto)
+            .expect(200);
 
-	it('DELETE /counters/:id - should delete the counter', async () => {
-		await request(app.getHttpServer()).delete(`${counterApiPath}/${counterId}`).expect(200);
+        expect(response.body.name).toBe(updateTaskDto.name);
+        expect(response.body.description).toBe(updateTaskDto.description);
+    });
 
-		await request(app.getHttpServer()).get(`${counterApiPath}/${counterId}`).expect(404);
-	});
+    it('PATCH /tasks/:id/done - should mark the task as completed', async () => {
+        const completeTaskDto: CompleteTaskDto = {
+            completed: true,
+        };
 
-	it('GET /counters - should return an empty list after deletion', async () => {
-		const response = await request(app.getHttpServer()).get(counterApiPath).expect(200);
+        const response = await request(app.getHttpServer())
+            .patch(`${taskApiPath}/${taskId}/done`)
+            .send(completeTaskDto)
+            .expect(200);
 
-		expect(Array.isArray(response.body)).toBe(true);
-		expect(response.body.length).toBe(0);
-	});
+        expect(response.body.completed).toBe(true);
+    });
+
+    it('DELETE /tasks/:id - should delete the task', async () => {
+        await request(app.getHttpServer()).delete(`${taskApiPath}/${taskId}`).expect(200);
+
+        await request(app.getHttpServer()).get(`${taskApiPath}/${taskId}`).expect(404);
+    });
 });
-*/

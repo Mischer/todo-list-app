@@ -1,4 +1,3 @@
-
 # todo-list-app
 
 ### Version: 0.0.1
@@ -64,13 +63,7 @@ This application provides API documentation using Swagger. Once the application 
 To run the test suite, use:
 
 ```bash
-npm run test
-```
-
-You can also run tests in watch mode:
-
-```bash
-npm run test:watch
+npm run test:e2e
 ```
 
 ## Building the Project

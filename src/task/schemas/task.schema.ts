@@ -1,6 +1,9 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import {Group} from "../../group/schemas/group.schema";
+
+export type TaskDocument = Task & Document;
 
 @Schema({ timestamps: true })
 export class Task extends Document {

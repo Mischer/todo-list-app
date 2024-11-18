@@ -1,5 +1,5 @@
 {
-  "name": "todo-nestjs-improved",
+  "name": "todo-list-app",
   "version": "1.0.0",
   "description": "Todo list API using NestJS and MongoDB",
   "author": "Mikhail Kultyiasau",
