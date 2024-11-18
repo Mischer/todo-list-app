@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { Group } from '../schemas/group.schema';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
-import {GroupResponseDto} from "../dto/group-response.dto";
 
 @Injectable()
 export class GroupRepository {
